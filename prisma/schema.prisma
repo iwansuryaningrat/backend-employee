@@ -57,6 +57,7 @@ model Overtimes {
   user       Users    @relation(fields: [userId], references: [id])
   date       DateTime @default(now())
   hours      Float
+  amount     Float
   reason     String
   created_at DateTime @default(now())
   updated_at DateTime @default(now()) @db.Timestamptz(6)
