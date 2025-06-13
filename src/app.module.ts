@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
+import { AuthHelper } from '@app/common/helpers';
 import { CacheModule } from '@nestjs/cache-manager';
 import { AuthService } from './services/auth.service';
-import { AuthHelper } from '@app/common/helpers/auth.helper';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { EmployeeService } from './services/employee.service';
 import { AuthController } from './controllers/auth.controller';

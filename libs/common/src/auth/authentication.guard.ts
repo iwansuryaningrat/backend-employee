@@ -1,5 +1,5 @@
 import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from "@nestjs/common";
-import { AuthHelper } from "../helpers/auth.helper";
+import { AuthHelper } from "../helpers";
 import { Request } from "express";
 
 @Injectable()

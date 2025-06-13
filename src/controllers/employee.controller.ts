@@ -1,12 +1,13 @@
 import { ApiBadRequestResponse, ApiBearerAuth, ApiForbiddenResponse, ApiInternalServerErrorResponse, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { EmployeeService } from "src/services/employee.service";
-import { Controller, Inject, Post, Request, UseGuards } from "@nestjs/common";
+import { Body, Controller, Inject, Post, Request, UseGuards } from "@nestjs/common";
 import { AuthenticationGuard } from "@app/common/auth/authentication.guard";
 import { AuthorizationGuard } from "@app/common/auth/authorization.guard";
 import { Roles } from "@app/common/decorators/roles.decorator";
 import { Role } from "@prisma/client";
-import { SubmitAttendanceResponse } from "src/example-responses";
+import { SubmitAttendanceResponse, SubmitOvertimeResponse } from "src/example-responses";
 import { date } from "joi";
+import { SubmitOvertimeDTO } from "src/dtos/employee.dto";
 
 @UseGuards(AuthenticationGuard, AuthorizationGuard)
 @Roles([Role.employee])
@@ -85,5 +86,74 @@ export class EmployeeController {
   })
   async submitAttendance(@Request() req: any) {
     return await this.employeeService.submitAttendance(req.user);
+  }
+
+  @Post('submit-overtime')
+  @ApiOperation({
+    summary: 'Submit Overtime',
+    description: 'Submit Overtime for employees'
+  })
+  @ApiOkResponse({
+    description: 'Success Response',
+    example: SubmitOvertimeResponse,
+    schema: {
+      properties: {
+        message: { type: 'string' },
+        overtime: {
+          properties: {
+            id: { type: 'number' },
+            userId: { type: 'number' },
+            date: { type: 'string' },
+            hours: { type: 'number' },
+            amount: { type: 'number' },
+            reason: { type: 'string' },
+            created_at: { type: 'string' },
+            updated_at: { type: 'string' },
+          }
+        }
+      }
+    }
+  })
+  @ApiBadRequestResponse({
+    description: 'Bad Request Error Response',
+    example: {
+      "statusCode": 400,
+      "message": "It's too early to submit your overtime!"
+    },
+    schema: {
+      properties: {
+        statusCode: { type: 'number' },
+        message: { type: 'string' },
+      }
+    }
+  })
+  @ApiForbiddenResponse({
+    description: 'Forbidden Error Response',
+    example: {
+      "statusCode": 403,
+      "message": "You are not an employee!"
+    },
+    schema: {
+      properties: {
+        statusCode: { type: 'number' },
+        message: { type: 'string' },
+      }
+    }
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'Internal Server Error Response',
+    example: {
+      "statusCode": 500,
+      "message": "Internal Server Error!"
+    },
+    schema: {
+      properties: {
+        statusCode: { type: 'number' },
+        message: { type: 'string' },
+      }
+    }
+  })
+  async submitOvertime(@Request() req: any, @Body() data: SubmitOvertimeDTO) {
+    return await this.employeeService.submitOvertime(req.user, data);
   }
 }
