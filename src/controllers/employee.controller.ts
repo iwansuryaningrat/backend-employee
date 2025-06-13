@@ -5,6 +5,8 @@ import { AuthenticationGuard } from "@app/common/auth/authentication.guard";
 import { AuthorizationGuard } from "@app/common/auth/authorization.guard";
 import { Roles } from "@app/common/decorators/roles.decorator";
 import { Role } from "@prisma/client";
+import { SubmitAttendanceResponse } from "src/example-responses";
+import { date } from "joi";
 
 @UseGuards(AuthenticationGuard, AuthorizationGuard)
 @Roles([Role.employee])
@@ -20,6 +22,27 @@ export class EmployeeController {
   @ApiOperation({
     summary: 'Submit Attendance',
     description: 'Submit Attendance for employees (check-in and check-out)'
+  })
+  @ApiOkResponse({
+    description: 'Success Response',
+    example: SubmitAttendanceResponse,
+    schema: {
+      properties: {
+        message: { type: 'string' },
+        attendance: {
+          properties: {
+            id: { type: 'number' },
+            userId: { type: 'number' },
+            date: { type: 'string' },
+            status: { type: 'string' },
+            checkIn: { type: 'string' },
+            checkOut: { type: 'string' },
+            created_at: { type: 'string' },
+            updated_at: { type: 'string' },
+          }
+        }
+      }
+    }
   })
   @ApiBadRequestResponse({
     description: 'Bad Request Error Response',

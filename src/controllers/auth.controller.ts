@@ -1,8 +1,8 @@
 import { ApiBadRequestResponse, ApiInternalServerErrorResponse, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
-import { LoginResponse } from "src/example-responses/auth.response";
 import { Body, Controller, Inject, Post } from "@nestjs/common";
 import { AuthService } from "../services/auth.service";
-import { LoginDTO } from "src/dtos/auth.dto";
+import { LoginResponse } from "../example-responses";
+import { LoginDTO } from "../dtos";
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -31,8 +31,8 @@ export class AuthController {
             name: { type: 'string' },
             username: { type: 'string' },
             role: { type: 'string' },
-            createdAt: { type: 'string' },
-            updatedAt: { type: 'string' },
+            created_at: { type: 'string' },
+            updated_at: { type: 'string' },
           }
         }
       }
