@@ -1,12 +1,8 @@
 import { Module } from "@nestjs/common";
-import { CommonService } from "./common.service";
 import { JwtModule } from "@nestjs/jwt";
+import { CommonService } from "./common.service";
+import { DatabaseModule } from "./database/database.module";
 import { ConfigModule, ConfigService } from "@nestjs/config";
-import { DatabaseModule } from "./model/database.module";
-import { MongooseModule } from "@nestjs/mongoose";
-import { MongooseModulesImport } from "./model/database.service";
-import { ServeStaticModule } from "@nestjs/serve-static";
-import { join } from "path";
 
 @Module({
   imports: [
@@ -23,12 +19,8 @@ import { join } from "path";
       envFilePath: ".env",
     }),
     DatabaseModule,
-    MongooseModule.forFeature(MongooseModulesImport),
-    ServeStaticModule.forRoot({
-      rootPath: join(__dirname, ".."),
-    }),
   ],
   providers: [CommonService],
   exports: [CommonService],
 })
-export class CommonModule {}
+export class CommonModule { }

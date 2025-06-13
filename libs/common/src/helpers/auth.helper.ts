@@ -35,7 +35,7 @@ export class AuthHelper {
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(
         {
-          _id: userId,
+          id: userId,
           ...data,
         },
         {
@@ -45,7 +45,7 @@ export class AuthHelper {
       ),
       this.jwtService.signAsync(
         {
-          _id: userId,
+          id: userId,
           ...data,
         },
         {

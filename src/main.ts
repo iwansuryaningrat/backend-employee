@@ -6,6 +6,8 @@ import { DocumentBuilder, SwaggerCustomOptions, SwaggerModule } from "@nestjs/sw
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  const port = process.env.PORT || 3000;
+
   app.enableCors({
     origin: "*",
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
@@ -19,7 +21,7 @@ async function bootstrap() {
     .setTitle('Employees API')
     .setDescription('API for Employees Test')
     .setContact('Iwan Suryaningrat', 'https://iwansuryaningrat.tech', 'iwan.suryaningrat28@gmail.com')
-    .addServer('localhost:3000', "Local Server",)
+    .addServer(`http://localhost:${port}`, "Local Server",)
     .setVersion('1.0')
     .setLicense('MIT', 'https://github.com/nestjs/nest/blob/master/LICENSE')
     .addBearerAuth({
@@ -50,6 +52,8 @@ async function bootstrap() {
 
   SwaggerModule.setup('docs', app, document, setupOptions);
 
-  await app.listen(3000);
+  await app.listen(port);
+  console.log(`Application is running on: ${await app.getUrl()}`);
+  console.log(`Swagger is running on: ${await app.getUrl()}/docs`);
 }
 bootstrap();
