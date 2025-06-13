@@ -1,6 +1,7 @@
 import * as bcrypt from "bcryptjs";
 import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
+import { IUserData } from "../interfaces/user.interface";
 import { PrismaService } from "../database/prisma.service";
 import { Injectable, Inject, UnauthorizedException } from "@nestjs/common";
 
@@ -21,7 +22,7 @@ export class AuthHelper {
   // Get User by User ID we get from decode()
   public async validateUser(decoded: any): Promise<any> {
     const user = await this.prismaService.users.findUnique({
-      where: { id: decoded._id },
+      where: { id: decoded.id },
     });
 
     return user;
@@ -30,7 +31,7 @@ export class AuthHelper {
   // Generate JWT Token
   public async generateTokens(
     userId: number,
-    data: { name: string; role: string; email?: string; username?: string },
+    data: IUserData,
   ) {
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(
@@ -40,7 +41,7 @@ export class AuthHelper {
         },
         {
           secret: this.configService.get("JWT_SECRET"),
-          expiresIn: "1d",
+          expiresIn: this.configService.get("JWT_EXPIRES"),
         },
       ),
       this.jwtService.signAsync(
@@ -50,7 +51,7 @@ export class AuthHelper {
         },
         {
           secret: this.configService.get("JWT_SECRET"),
-          expiresIn: "3d",
+          expiresIn: this.configService.get("REFRESH_TOKEN_EXPIRES"),
         },
       ),
     ]);

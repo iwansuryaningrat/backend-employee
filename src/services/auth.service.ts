@@ -23,6 +23,7 @@ export class AuthService {
       delete user.password;
 
       const { accessToken, refreshToken } = await this.authHelper.generateTokens(user.id, {
+        id: user.id,
         name: user.name,
         role: user.role,
         email: user.email,

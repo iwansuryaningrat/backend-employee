@@ -43,7 +43,7 @@ model Attendances {
   id         Int              @id @default(autoincrement())
   userId     Int
   user       Users            @relation(fields: [userId], references: [id])
-  date       DateTime         @default(now())
+  date       String
   status     AttendanceStatus @default(present)
   checkIn    DateTime?        @db.Timestamptz(6)
   checkOut   DateTime?        @db.Timestamptz(6)
@@ -55,7 +55,7 @@ model Overtimes {
   id         Int      @id @default(autoincrement())
   userId     Int
   user       Users    @relation(fields: [userId], references: [id])
-  date       DateTime @default(now())
+  date       String
   hours      Float
   amount     Float
   reason     String

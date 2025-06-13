@@ -5,5 +5,10 @@ import { PrismaClient } from '@prisma/client';
 export class PrismaService extends PrismaClient implements OnModuleInit {
   async onModuleInit() {
     await this.$connect();
+    await this.$executeRawUnsafe(`SET TIME ZONE 'Asia/Jakarta'`);
+  }
+
+  async onModuleDestroy() {
+    await this.$disconnect();
   }
 }

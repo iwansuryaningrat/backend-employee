@@ -1,9 +1,10 @@
+import { ApiBadRequestResponse, ApiInternalServerErrorResponse, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
+import { LoginResponse } from "src/example-responses/auth.response";
 import { Body, Controller, Inject, Post } from "@nestjs/common";
 import { AuthService } from "../services/auth.service";
 import { LoginDTO } from "src/dtos/auth.dto";
-import { ApiBadRequestResponse, ApiInternalServerErrorResponse, ApiNotFoundResponse, ApiOkResponse, ApiOperation } from "@nestjs/swagger";
-import { LoginResponse } from "src/example-responses/auth.response";
 
+@ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -14,10 +15,9 @@ export class AuthController {
   @ApiOperation({
     summary: 'Login User',
     description: 'Login User',
-    tags: ['Auth']
   })
   @ApiOkResponse({
-    description: 'Success Login',
+    description: 'Success Response',
     example: LoginResponse,
     schema: {
       properties: {
@@ -39,7 +39,7 @@ export class AuthController {
     }
   })
   @ApiNotFoundResponse({
-    description: 'User not found',
+    description: 'Not Found Error Response',
     example: {
       "statusCode": 404,
       "message": "User not found!"
@@ -52,7 +52,7 @@ export class AuthController {
     }
   })
   @ApiBadRequestResponse({
-    description: 'Password is incorrect',
+    description: 'Bad Request Error Response',
     example: {
       "statusCode": 400,
       "message": "Password is incorrect!"
@@ -65,7 +65,7 @@ export class AuthController {
     }
   })
   @ApiInternalServerErrorResponse({
-    description: 'Internal Server Error',
+    description: 'Internal Server Error Response',
     example: {
       "statusCode": 500,
       "message": "Internal Server Error!"
