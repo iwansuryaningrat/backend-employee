@@ -1,13 +1,15 @@
-import { ApiBadRequestResponse, ApiBearerAuth, ApiForbiddenResponse, ApiInternalServerErrorResponse, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
-import { EmployeeService } from "src/services/employee.service";
-import { Body, Controller, Inject, Post, Request, UseGuards } from "@nestjs/common";
+import { ApiBadRequestResponse, ApiBearerAuth, ApiBody, ApiConsumes, ApiForbiddenResponse, ApiInternalServerErrorResponse, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
+import { BadRequestException, Body, Controller, Inject, Post, Request, UploadedFile, UseGuards, UseInterceptors } from "@nestjs/common";
+import { imageFilter, limitImageUpload, storageSetting } from "@app/common/helpers/validators/file.validator";
+import { SubmitAttendanceResponse, SubmitOvertimeResponse, SubmitReimburseResponse } from "../example-responses";
 import { AuthenticationGuard } from "@app/common/auth/authentication.guard";
 import { AuthorizationGuard } from "@app/common/auth/authorization.guard";
+import { EmployeeService } from "../services/employee.service";
 import { Roles } from "@app/common/decorators/roles.decorator";
+import { FileInterceptor } from "@nestjs/platform-express";
+import { SubmitOvertimeDTO, SubmitReimburseDTO } from "../dtos/employee.dto";
 import { Role } from "@prisma/client";
-import { SubmitAttendanceResponse, SubmitOvertimeResponse } from "src/example-responses";
-import { date } from "joi";
-import { SubmitOvertimeDTO } from "src/dtos/employee.dto";
+import { diskStorage } from 'multer';
 
 @UseGuards(AuthenticationGuard, AuthorizationGuard)
 @Roles([Role.employee])
@@ -155,5 +157,98 @@ export class EmployeeController {
   })
   async submitOvertime(@Request() req: any, @Body() data: SubmitOvertimeDTO) {
     return await this.employeeService.submitOvertime(req.user, data);
+  }
+
+  @Post('submit-reimburse')
+  @ApiOperation({
+    summary: 'Submit Reimburse',
+    description: 'Submit Reimburse for employees'
+  })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    type: 'multipart/form-data',
+    schema: {
+      type: 'multipart/form-data',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary'
+        },
+        description: {
+          type: 'string',
+        },
+        amount: {
+          type: 'number',
+        },
+      },
+      required: ['file', 'description', 'amount'],
+    },
+  })
+  @ApiOkResponse({
+    description: 'Success Response',
+    example: SubmitReimburseResponse,
+    schema: {
+      properties: {
+        message: { type: 'string' },
+        reimburse: {
+          properties: {
+            id: { type: 'number' },
+            userId: { type: 'number' },
+            description: { type: 'string' },
+            amount: { type: 'number' },
+            link: { type: 'string' },
+            created_at: { type: 'string' },
+            updated_at: { type: 'string' },
+          }
+        }
+      }
+    }
+  })
+  @ApiBadRequestResponse({
+    description: 'Bad Request Error Response',
+    example: {
+      "statusCode": 400,
+      "message": "You cannot submit reimbursement on weekends!"
+    },
+    schema: {
+      properties: {
+        statusCode: { type: 'number' },
+        message: { type: 'string' },
+      }
+    }
+  })
+  @ApiForbiddenResponse({
+    description: 'Forbidden Error Response',
+    example: {
+      "statusCode": 403,
+      "message": "You are not an employee!"
+    },
+    schema: {
+      properties: {
+        statusCode: { type: 'number' },
+        message: { type: 'string' },
+      }
+    }
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'Internal Server Error Response',
+    example: {
+      "statusCode": 500,
+      "message": "Internal Server Error!"
+    },
+    schema: {
+      properties: {
+        statusCode: { type: 'number' },
+        message: { type: 'string' },
+      }
+    }
+  })
+  @UseInterceptors(FileInterceptor('file', {
+    storage: diskStorage(storageSetting),
+    fileFilter: imageFilter,
+    limits: limitImageUpload(),
+  }))
+  async submitReimburse(@Request() req: any, @UploadedFile() file: Express.Multer.File, @Body() data: SubmitReimburseDTO) {
+    return await this.employeeService.submitReimburse(req.user, data, file);
   }
 }

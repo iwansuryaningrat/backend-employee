@@ -12,7 +12,6 @@ export const SubmitAttendanceResponse = {
   }
 }
 
-
 export const SubmitOvertimeResponse = {
   "message": "You have submitted your overtime for today!",
   "overtime": {
@@ -24,5 +23,18 @@ export const SubmitOvertimeResponse = {
     "reason": "No reason",
     "created_at": "2025-06-13T21:29:35.892Z",
     "updated_at": "2025-06-13T21:29:35.892Z"
+  }
+}
+
+export const SubmitReimburseResponse = {
+  "message": "You have submitted your reimbursement!",
+  "reimburse": {
+    "id": 1,
+    "userId": 349,
+    "amount": 2000000,
+    "description": "Test",
+    "link": "localhost:3030/uploads/my-photo-1749879296616-116745367.jpg",
+    "created_at": "2025-06-14T05:34:56.636Z",
+    "updated_at": "2025-06-14T05:34:56.636Z"
   }
 }

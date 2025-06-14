@@ -1,5 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsNotEmpty, IsNumber, IsOptional, IsString, Max, Min } from "class-validator";
+import { Transform } from "class-transformer";
+import { IsNotEmpty, IsNumber, IsNumberString, IsOptional, IsString, Max, Min } from "class-validator";
 
 export class SubmitOvertimeDTO {
   @ApiProperty({ type: Number, required: true, example: 3 })
@@ -15,4 +16,16 @@ export class SubmitOvertimeDTO {
   @IsOptional()
   @IsString()
   reason?: string
+}
+
+export class SubmitReimburseDTO {
+  @ApiProperty({ type: String, required: true, example: "No reason" })
+  @IsNotEmpty()
+  @IsString()
+  description: string
+
+  @ApiProperty({ type: String, required: true, example: 10000 })
+  @IsNotEmpty()
+  @IsString()
+  amount: string
 }

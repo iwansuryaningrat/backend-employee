@@ -1,26 +1,28 @@
 import { BadRequestException, ForbiddenException, HttpException, HttpStatus, Inject, Injectable, Logger, NotFoundException } from "@nestjs/common";
 import { endWorkingTime, startWorkingTime, workingHours } from "@app/common/constants";
+import { countWeekdaysInMonth, getDates } from "@app/common/helpers";
 import { PrismaService } from "@app/common/database/prisma.service";
 import { IUserData } from "@app/common/interfaces/user.interface";
-import { SubmitOvertimeDTO } from "../dtos/employee.dto";
+import { SubmitOvertimeDTO, SubmitReimburseDTO } from "../dtos/employee.dto";
 import { AttendanceStatus, Role } from "@prisma/client";
-import { countWeekdaysInMonth, getDates } from "@app/common/helpers";
 import * as moment from "moment-timezone";
+import { ConfigService } from "@nestjs/config";
 
 @Injectable()
 export class EmployeeService {
   constructor(
-    @Inject(PrismaService) private readonly prisma: PrismaService
+    @Inject(PrismaService) private readonly prisma: PrismaService,
+    @Inject(ConfigService) private readonly configService: ConfigService,
   ) { }
 
   private readonly logger = new Logger(EmployeeService.name);
 
+  private filePath = this.configService.get<string>('ASSETS_HOST');
+
   async submitAttendance(user: IUserData) {
     try {
-      if (user.role !== Role.employee) throw new ForbiddenException("You are not an employee!");
-
       const { date, today, dayOfWeek } = getDates();
-      // if (dayOfWeek === 0 || dayOfWeek === 6) throw new BadRequestException("You cannot submit attendance on weekends!");
+      if (dayOfWeek === 0 || dayOfWeek === 6) throw new BadRequestException("You cannot submit attendance on weekends!");
 
       const message = `You have submitted your attendance for ${today}, ${user.name}!`;
       let attendance = await this.prisma.attendances.findFirst({
@@ -74,8 +76,6 @@ export class EmployeeService {
 
   async submitOvertime(user: IUserData, data: SubmitOvertimeDTO) {
     try {
-      if (user.role !== Role.employee) throw new ForbiddenException("You are not an employee!");
-
       const { date, today, dayOfWeek } = getDates();
       const isWeekend: boolean = dayOfWeek === 0 || dayOfWeek === 6;
       const isBeforeEndWorkingTime: boolean = moment(date, "DD-MM-YYYY HH:mm:ss").isBefore(moment(today + ' ' + endWorkingTime, "DD-MM-YYYY HH:mm:ss"));
@@ -139,5 +139,25 @@ export class EmployeeService {
     const hourlyRate = monthlySalary / (workDaysPerMonth * workingHours);
     const overtimePay = overtimeHours * hourlyRate * 2;
     return Math.round(overtimePay);
+  }
+
+  async submitReimburse(user: IUserData, data: SubmitReimburseDTO, file: Express.Multer.File) {
+    try {
+      const filePath: string = this.filePath + file.filename;
+
+      const reimburse = await this.prisma.reimbursements.create({
+        data: {
+          userId: user.id,
+          amount: Number(data.amount),
+          description: data.description,
+          link: filePath
+        }
+      })
+
+      return { message: "You have submitted your reimbursement!", reimburse }
+    } catch (error) {
+      this.logger.error(this.submitReimburse.name, error?.message);
+      throw new HttpException(error.message, error?.status || HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 }
