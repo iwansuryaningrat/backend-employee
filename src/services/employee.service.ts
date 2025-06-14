@@ -1,7 +1,7 @@
 import { BadRequestException, ForbiddenException, HttpException, HttpStatus, Inject, Injectable, Logger, NotFoundException } from "@nestjs/common";
 import { IAttendance, IEmployeePayslip, IOvertime, IOvertimesSummmary, IReimburse, IReimburseSummmary } from "src/interfaces";
 import { endWorkingTime, startWorkingTime, workingHours } from "@app/common/constants";
-import { countWeekdaysInMonth, getDates, getRangeMonth } from "@app/common/helpers";
+import { countWeekdaysInMonth, getDates, getMonthName, getRangeMonth } from "@app/common/helpers";
 import { SubmitOvertimeDTO, SubmitReimburseDTO } from "../dtos/employee.dto";
 import { PrismaService } from "@app/common/database/prisma.service";
 import { IUserData } from "@app/common/interfaces/user.interface";
@@ -261,7 +261,9 @@ export class EmployeeService {
         overtimes: overtimesSummary,
         reimbursements: reimbursementsSummary,
         baseSalary: employee.salary,
-        takeHomePay: employee.salary + totalPay + totalAmount
+        takeHomePay: employee.salary + totalPay + totalAmount,
+        month: getMonthName(month),
+        year
       }
 
       const response = {

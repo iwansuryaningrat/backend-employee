@@ -76,6 +76,8 @@ export const GetPayslipResponse = {
       ]
     },
     "baseSalary": 130000000,
-    "takeHomePay": 141285714
+    "takeHomePay": 141285714,
+    "month": "June",
+    "year": 2025
   }
 }

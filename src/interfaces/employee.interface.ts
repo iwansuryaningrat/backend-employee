@@ -35,4 +35,6 @@ export interface IEmployeePayslip {
   reimbursements: IReimburseSummmary;
   baseSalary: number;
   takeHomePay: number;
+  month: string;
+  year: number;
 }

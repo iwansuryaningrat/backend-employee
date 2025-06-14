@@ -307,6 +307,8 @@ export class EmployeeController {
             },
             baseSalary: { type: 'number' },
             takeHomePay: { type: 'number' },
+            month: { type: 'string' },
+            year: { type: 'number' },
           }
         }
       }
