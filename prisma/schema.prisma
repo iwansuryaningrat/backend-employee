@@ -43,42 +43,45 @@ model Employees {
 }
 
 model Attendances {
-  id         Int              @id @default(autoincrement())
-  userId     Int
-  user       Users            @relation(fields: [userId], references: [id])
-  date       String
-  status     AttendanceStatus @default(present)
-  checkIn    DateTime?        @db.Timestamptz(6)
-  checkOut   DateTime?        @db.Timestamptz(6)
-  created_at DateTime         @default(now()) @db.Timestamptz(6)
-  updated_at DateTime         @default(now()) @db.Timestamptz(6)
+  id             Int              @id @default(autoincrement())
+  userId         Int
+  user           Users            @relation(fields: [userId], references: [id])
+  date           String
+  status         AttendanceStatus @default(present)
+  checkIn        DateTime?        @db.Timestamptz(6)
+  checkOut       DateTime?        @db.Timestamptz(6)
+  is_run_payroll Boolean          @default(false)
+  created_at     DateTime         @default(now()) @db.Timestamptz(6)
+  updated_at     DateTime         @default(now()) @db.Timestamptz(6)
 
   @@index([userId])
 }
 
 model Overtimes {
-  id         Int      @id @default(autoincrement())
-  userId     Int
-  user       Users    @relation(fields: [userId], references: [id])
-  date       String
-  hours      Float
-  amount     Float?
-  reason     String?
-  created_at DateTime @default(now()) @db.Timestamptz(6)
-  updated_at DateTime @default(now()) @db.Timestamptz(6)
+  id             Int      @id @default(autoincrement())
+  userId         Int
+  user           Users    @relation(fields: [userId], references: [id])
+  date           String
+  hours          Float
+  amount         Float?
+  reason         String?
+  is_run_payroll Boolean  @default(false)
+  created_at     DateTime @default(now()) @db.Timestamptz(6)
+  updated_at     DateTime @default(now()) @db.Timestamptz(6)
 
   @@index([userId])
 }
 
 model Reimbursements {
-  id          Int      @id @default(autoincrement())
-  userId      Int
-  user        Users    @relation(fields: [userId], references: [id])
-  amount      Float
-  description String
-  link        String?
-  created_at  DateTime @default(now()) @db.Timestamptz(6)
-  updated_at  DateTime @default(now()) @db.Timestamptz(6)
+  id             Int      @id @default(autoincrement())
+  userId         Int
+  user           Users    @relation(fields: [userId], references: [id])
+  amount         Float
+  description    String
+  link           String?
+  is_run_payroll Boolean  @default(false)
+  created_at     DateTime @default(now()) @db.Timestamptz(6)
+  updated_at     DateTime @default(now()) @db.Timestamptz(6)
 
   @@index([userId])
 }

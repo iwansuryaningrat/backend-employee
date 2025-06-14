@@ -1,7 +1,7 @@
 import { ApiBadRequestResponse, ApiBearerAuth, ApiBody, ApiConsumes, ApiForbiddenResponse, ApiInternalServerErrorResponse, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
-import { BadRequestException, Body, Controller, Inject, Post, Request, UploadedFile, UseGuards, UseInterceptors } from "@nestjs/common";
+import { BadRequestException, Body, Controller, Get, Inject, Post, Request, UploadedFile, UseGuards, UseInterceptors } from "@nestjs/common";
 import { imageFilter, limitImageUpload, storageSetting } from "@app/common/helpers/validators/file.validator";
-import { SubmitAttendanceResponse, SubmitOvertimeResponse, SubmitReimburseResponse } from "../example-responses";
+import { GetPayslipResponse, SubmitAttendanceResponse, SubmitOvertimeResponse, SubmitReimburseResponse } from "../example-responses";
 import { AuthenticationGuard } from "@app/common/auth/authentication.guard";
 import { AuthorizationGuard } from "@app/common/auth/authorization.guard";
 import { EmployeeService } from "../services/employee.service";
@@ -250,5 +250,108 @@ export class EmployeeController {
   }))
   async submitReimburse(@Request() req: any, @UploadedFile() file: Express.Multer.File, @Body() data: SubmitReimburseDTO) {
     return await this.employeeService.submitReimburse(req.user, data, file);
+  }
+
+  @Get('payslip')
+  @ApiOperation({
+    summary: 'Get Payslip',
+    description: 'Get Current Payslip for employees'
+  })
+  @ApiOkResponse({
+    description: 'Success Response',
+    example: GetPayslipResponse,
+    schema: {
+      properties: {
+        message: { type: 'string' },
+        data: {
+          properties: {
+            attendances: {
+              properties: {
+                totalWorkingDays: { type: 'number' },
+                totalPresentDays: { type: 'number' },
+                totalLateDays: { type: 'number' },
+                totalAbsentDays: { type: 'number' },
+              }
+            },
+            overtimes: {
+              properties: {
+                totalHours: { type: 'number' },
+                totalPay: { type: 'number' },
+                overtimes: {
+                  type: 'array',
+                  items: {
+                    properties: {
+                      date: { type: 'string' },
+                      hours: { type: 'number' },
+                      totalPay: { type: 'number' },
+                    }
+                  }
+                }
+              }
+            },
+            reimbursements: {
+              properties: {
+                totalAmount: { type: 'number' },
+                reimbursements: {
+                  type: 'array',
+                  items: {
+                    properties: {
+                      description: { type: 'string' },
+                      amount: { type: 'number' },
+                      link: { type: 'string' },
+                      created_at: { type: 'string' },
+                    }
+                  }
+                }
+              }
+            },
+            baseSalary: { type: 'number' },
+            takeHomePay: { type: 'number' },
+          }
+        }
+      }
+    }
+  })
+  @ApiBadRequestResponse({
+    description: 'Bad Request Error Response',
+    example: {
+      "statusCode": 400,
+      "message": "You cannot get payslip!"
+    },
+    schema: {
+      properties: {
+        statusCode: { type: 'number' },
+        message: { type: 'string' },
+      }
+    }
+  })
+  @ApiForbiddenResponse({
+    description: 'Forbidden Error Response',
+    example: {
+      "statusCode": 403,
+      "message": "You are not an employee!"
+    },
+    schema: {
+      properties: {
+        statusCode: { type: 'number' },
+        message: { type: 'string' },
+      }
+    }
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'Internal Server Error Response',
+    example: {
+      "statusCode": 500,
+      "message": "Internal Server Error!"
+    },
+    schema: {
+      properties: {
+        statusCode: { type: 'number' },
+        message: { type: 'string' },
+      }
+    }
+  })
+  async payslip(@Request() req: any) {
+    return await this.employeeService.employeePayslip(req.user);
   }
 }

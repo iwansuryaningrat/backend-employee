@@ -1,16 +1,20 @@
 import { BadRequestException, ForbiddenException, HttpException, HttpStatus, Inject, Injectable, Logger, NotFoundException } from "@nestjs/common";
+import { IAttendance, IEmployeePayslip, IOvertime, IOvertimesSummmary, IReimburse, IReimburseSummmary } from "src/interfaces";
 import { endWorkingTime, startWorkingTime, workingHours } from "@app/common/constants";
-import { countWeekdaysInMonth, getDates } from "@app/common/helpers";
+import { countWeekdaysInMonth, getDates, getRangeMonth } from "@app/common/helpers";
+import { SubmitOvertimeDTO, SubmitReimburseDTO } from "../dtos/employee.dto";
 import { PrismaService } from "@app/common/database/prisma.service";
 import { IUserData } from "@app/common/interfaces/user.interface";
-import { SubmitOvertimeDTO, SubmitReimburseDTO } from "../dtos/employee.dto";
-import { AttendanceStatus, Role } from "@prisma/client";
-import * as moment from "moment-timezone";
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { AttendanceStatus } from "@prisma/client";
 import { ConfigService } from "@nestjs/config";
+import * as moment from "moment-timezone";
+import { Cache } from 'cache-manager';
 
 @Injectable()
 export class EmployeeService {
   constructor(
+    @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
     @Inject(PrismaService) private readonly prisma: PrismaService,
     @Inject(ConfigService) private readonly configService: ConfigService,
   ) { }
@@ -157,6 +161,118 @@ export class EmployeeService {
       return { message: "You have submitted your reimbursement!", reimburse }
     } catch (error) {
       this.logger.error(this.submitReimburse.name, error?.message);
+      throw new HttpException(error.message, error?.status || HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  async employeePayslip(user: IUserData) {
+    const currentDate = new Date();
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+    const { startDay, endDay } = getRangeMonth(month, year);
+    try {
+      const KEY_CACHE = `employeePayslip:${user.id}-${year}-${month}`;
+      const cacheData = await this.cacheManager.get<Awaited<ReturnType<EmployeeService['employeePayslip']>>>(KEY_CACHE);
+      if (cacheData) return cacheData;
+
+      const employee = await this.prisma.employees.findUnique({
+        where: {
+          userId: user.id
+        }
+      });
+      if (!employee) throw new NotFoundException("Employee not found!");
+
+      const attendances = await this.prisma.attendances.findMany({
+        where: {
+          userId: user.id,
+          date: {
+            gte: startDay,
+            lte: endDay
+          }
+        }
+      });
+
+      const totalWorkingDays: number = countWeekdaysInMonth(year, month);
+      const attendanceSummary: IAttendance = {
+        totalWorkingDays,
+        totalPresentDays: attendances.length,
+        totalAbsentDays: totalWorkingDays - attendances.length,
+        totalLateDays: attendances.filter(attendance => attendance.status === AttendanceStatus.late).length
+      }
+
+      const overtimes = await this.prisma.overtimes.findMany({
+        where: {
+          userId: user.id,
+          created_at: {
+            gte: startDay,
+            lte: endDay
+          }
+        }
+      });
+
+      let totalHours: number = 0;
+      let totalPay: number = 0;
+      const overtimesData: IOvertime[] = overtimes.map(overtime => {
+        totalHours += overtime.hours;
+        totalPay += overtime.amount;
+
+        return {
+          date: overtime.date,
+          hours: overtime.hours,
+          totalPay: overtime.amount
+        }
+      })
+
+      const overtimesSummary: IOvertimesSummmary = {
+        totalHours,
+        totalPay,
+        overtimes: overtimesData
+      }
+
+      const reimbursements = await this.prisma.reimbursements.findMany({
+        where: {
+          userId: user.id,
+          created_at: {
+            gte: startDay,
+            lte: endDay
+          }
+        }
+      });
+
+      let totalAmount: number = 0;
+      const reimbursementsData: IReimburse[] = reimbursements.map(reimbursement => {
+        totalAmount += reimbursement.amount;
+
+        return {
+          description: reimbursement.description,
+          amount: reimbursement.amount,
+          link: reimbursement.link,
+          created_at: reimbursement.created_at
+        }
+      });
+
+      const reimbursementsSummary: IReimburseSummmary = {
+        totalAmount,
+        reimbursements: reimbursementsData
+      }
+
+      const result: IEmployeePayslip = {
+        attendances: attendanceSummary,
+        overtimes: overtimesSummary,
+        reimbursements: reimbursementsSummary,
+        baseSalary: employee.salary,
+        takeHomePay: employee.salary + totalPay + totalAmount
+      }
+
+      const response = {
+        message: "Payslip generated successfully!",
+        data: result
+      }
+      await this.cacheManager.set(KEY_CACHE, response);
+
+      return response
+    } catch (error) {
+      this.logger.error(this.employeePayslip.name, error?.message);
       throw new HttpException(error.message, error?.status || HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }

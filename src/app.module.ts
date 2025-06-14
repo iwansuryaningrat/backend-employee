@@ -15,7 +15,7 @@ import { EmployeeController } from './controllers/employee.controller';
   imports: [
     DatabaseModule,
     CacheModule.register({
-      ttl: 30 * 1000, // 5 seconds
+      ttl: 30 * 1000,
       isGlobal: true,
     }),
     JwtModule.registerAsync({
