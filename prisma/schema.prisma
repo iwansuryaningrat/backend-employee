@@ -38,6 +38,8 @@ model Employees {
   salary     Float
   created_at DateTime @default(now()) @db.Timestamptz(6)
   updated_at DateTime @default(now()) @db.Timestamptz(6)
+
+  @@index([userId])
 }
 
 model Attendances {
@@ -50,6 +52,8 @@ model Attendances {
   checkOut   DateTime?        @db.Timestamptz(6)
   created_at DateTime         @default(now()) @db.Timestamptz(6)
   updated_at DateTime         @default(now()) @db.Timestamptz(6)
+
+  @@index([userId])
 }
 
 model Overtimes {
@@ -62,6 +66,8 @@ model Overtimes {
   reason     String?
   created_at DateTime @default(now()) @db.Timestamptz(6)
   updated_at DateTime @default(now()) @db.Timestamptz(6)
+
+  @@index([userId])
 }
 
 model Reimbursements {
@@ -73,6 +79,8 @@ model Reimbursements {
   link        String?
   created_at  DateTime @default(now()) @db.Timestamptz(6)
   updated_at  DateTime @default(now()) @db.Timestamptz(6)
+
+  @@index([userId])
 }
 
 model Payslips {
@@ -84,6 +92,9 @@ model Payslips {
   takeHomePay Int
   created_at  DateTime @default(now()) @db.Timestamptz(6)
   updated_at  DateTime @default(now()) @db.Timestamptz(6)
+
+  @@index([userId])
+  @@index([month, year])
 }
 
 enum Role {
