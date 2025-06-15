@@ -1,7 +1,7 @@
 import * as bcrypt from "bcryptjs";
 import { JwtService } from "@nestjs/jwt";
+import { IUserData } from "../interfaces";
 import { ConfigService } from "@nestjs/config";
-import { IUserData } from "../interfaces/user.interface";
 import { PrismaService } from "../database/prisma.service";
 import { Injectable, Inject, UnauthorizedException } from "@nestjs/common";
 

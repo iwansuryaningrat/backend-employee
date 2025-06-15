@@ -1,12 +1,12 @@
 import { ApiBadRequestResponse, ApiBearerAuth, ApiForbiddenResponse, ApiInternalServerErrorResponse, ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { Body, Controller, Get, Inject, Post, Query, UseGuards } from "@nestjs/common";
-import { AuthenticationGuard } from "@app/common/auth/authentication.guard";
-import { AuthorizationGuard } from "@app/common/auth/authorization.guard";
-import { Roles } from "@app/common/decorators/roles.decorator";
-import { PayslipSummaryResponse } from "src/example-responses";
-import { AdminService } from "src/services/admin.service";
+import { AuthenticationGuard } from "../auth/authentication.guard";
+import { AuthorizationGuard } from "../auth/authorization.guard";
+import { PayslipSummaryResponse } from "../example-responses";
+import { AdminService } from "../services/admin.service";
+import { Roles } from "../decorators/roles.decorator";
 import { Role } from "@prisma/client";
-import { PayslipDTO } from "src/dtos";
+import { PayslipDTO } from "../dtos";
 
 
 @UseGuards(AuthenticationGuard, AuthorizationGuard)

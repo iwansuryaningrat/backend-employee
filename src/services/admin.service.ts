@@ -1,9 +1,9 @@
 import { BadRequestException, HttpException, HttpStatus, Inject, Injectable, Logger } from "@nestjs/common";
-import { PrismaService } from "@app/common/database/prisma.service";
-import { IUserData } from "@app/common/interfaces/user.interface";
+import { PrismaService } from "../database/prisma.service";
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { EmployeeService } from "./employee.service";
-import { getRangeMonth } from "@app/common/helpers";
+import { getRangeMonth } from "../helpers";
+import { IUserData } from "../interfaces";
 import { Cache } from 'cache-manager';
 import { PayslipDTO } from "../dtos";
 
