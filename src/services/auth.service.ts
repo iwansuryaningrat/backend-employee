@@ -1,6 +1,6 @@
 import { BadRequestException, HttpException, HttpStatus, Inject, Injectable, Logger, NotFoundException } from "@nestjs/common";
-import { PrismaService } from "src/database/prisma.service";
-import { AuthHelper } from "src/helpers";
+import { PrismaService } from "../database/prisma.service";
+import { AuthHelper } from "../helpers";
 import { LoginDTO } from "../dtos";
 
 @Injectable()

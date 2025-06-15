@@ -1,7 +1,7 @@
 import { join } from 'path';
+import { AuthHelper } from './helpers';
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
-import { AuthHelper } from 'src/helpers';
 import { CacheModule } from '@nestjs/cache-manager';
 import { AuthService } from './services/auth.service';
 import { AdminService } from './services/admin.service';
